@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Inventario Móvil</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; -webkit-tap-highlight-color:transparent; }
+  body { background:#f0f2f5; color:#1a1a1a; padding:12px; padding-bottom:90px; }
+  .container { max-width:1200px; margin:0 auto; }
+
+  header { background:linear-gradient(135deg,#2563eb,#1e40af); color:#fff; padding:18px; border-radius:12px; margin-bottom:14px; box-shadow:0 4px 12px rgba(37,99,235,.3); }
+  header h1 { font-size:1.2rem; }
+  header p { opacity:.9; font-size:.82rem; margin-top:2px; }
+
+  /* Toolbar búsqueda */
+  .toolbar { background:#fff; padding:12px; border-radius:10px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+  .toolbar input, .toolbar select { padding:12px; border:1px solid #e2e8f0; border-radius:8px; font-size:1rem; width:100%; }
+  .toolbar input:focus, .toolbar select:focus { outline:none; border-color:#2563eb; }
+  .toolbar-row { display:flex; gap:8px; }
+  .toolbar-row select { flex:1; }
+
+  /* Botón flotante agregar */
+  .fab { position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:#2563eb; color:#fff; border:none; font-size:2rem; cursor:pointer; box-shadow:0 6px 20px rgba(37,99,235,.5); display:flex; align-items:center; justify-content:center; z-index:50; transition:.2s; }
+  .fab:active { transform:scale(.92); }
+
+  /* Menú inferior opciones */
+  .bottom-menu { position:fixed; bottom:20px; left:20px; display:flex; gap:8px; z-index:50; }
+  .icon-btn { width:48px; height:48px; border-radius:50%; background:#fff; color:#475569; border:none; font-size:1.2rem; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.15); display:flex; align-items:center; justify-content:center; }
+  .icon-btn:active { transform:scale(.92); }
+
+  /* Tarjetas de productos */
+  .cards { display:flex; flex-direction:column; gap:10px; }
+  .card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,.06); border-left:4px solid #2563eb; }
+  .card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px; }
+  .card-title { font-weight:700; font-size:1rem; line-height:1.3; flex:1; }
+  .card-badge { padding:4px 10px; border-radius:20px; font-size:.72rem; font-weight:700; white-space:nowrap; }
+  .badge-cat { background:#e0e7ff; color:#3730a3; }
+  .card-info { font-size:.85rem; color:#64748b; margin-bottom:8px; line-height:1.5; }
+  .card-info strong { color:#334155; }
+  .card-actions { display:flex; gap:8px; margin-top:10px; }
+  .card-actions .btn { flex:1; padding:10px; font-size:.9rem; }
+
+  .stock-control { display:flex; align-items:center; gap:10px; background:#f8fafc; border-radius:8px; padding:6px; }
+  .stock-control button { width:38px; height:38px; border-radius:8px; border:none; background:#e2e8f0; color:#1e293b; font-size:1.3rem; font-weight:700; cursor:pointer; }
+  .stock-control button:active { background:#cbd5e1; }
+  .stock-control .count { flex:1; text-align:center; font-size:1.2rem; font-weight:700; color:#1e293b; }
+
+  .btn { padding:10px 14px; border:none; border-radius:8px; font-weight:600; font-size:.9rem; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+  .btn-primary { background:#2563eb; color:#fff; }
+  .btn-success { background:#10b981; color:#fff; }
+  .btn-danger { background:#ef4444; color:#fff; }
+  .btn-ghost { background:#f1f5f9; color:#475569; }
+  .btn-sm { padding:8px 10px; font-size:.85rem; }
+
+  .empty { text-align:center; padding:50px 20px; color:#94a3b8; background:#fff; border-radius:12px; }
+  .empty .big { font-size:3rem; margin-bottom:10px; }
+
+  /* Modal */
+  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:flex-end; justify-content:center; z-index:200; }
+  .modal-bg.active { display:flex; }
+  .modal { background:#fff; border-radius:16px 16px 0 0; padding:20px; width:100%; max-width:600px; max-height:92vh; overflow-y:auto; }
+  .modal h2 { margin-bottom:16px; font-size:1.15rem; }
+  .form-group { margin-bottom:14px; }
+  .form-group label { display:block; font-size:.85rem; font-weight:600; margin-bottom:6px; color:#334155; }
+  .form-group input, .form-group select { width:100%; padding:13px; border:1px solid #e2e8f0; border-radius:10px; font-size:1rem; background:#fff; }
+  .form-group input:focus, .form-group select:focus { outline:none; border-color:#2563eb; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  /* Input con botón cámara */
+  .input-with-btn { display:flex; gap:8px; }
+  .input-with-btn input { flex:1; }
+  .cam-btn { width:52px; min-width:52px; border:none; border-radius:10px; background:#2563eb; color:#fff; font-size:1.4rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .cam-btn:active { background:#1e40af; }
+
+  .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; padding-top:16px; border-top:1px solid #f1f5f9; }
+  .modal-actions .btn { flex:1; padding:14px; font-size:1rem; }
+
+  /* Video cámara */
+  .cam-view { position:fixed; inset:0; background:#000; z-index:300; display:none; flex-direction:column; }
+  .cam-view.active { display:flex; }
+  .cam-view video { flex:1; width:100%; object-fit:cover; }
+  .cam-view .cam-controls { padding:20px; background:#000; display:flex; gap:12px; justify-content:center; }
+  .cam-view .cam-controls button { padding:14px 24px; border:none; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer; }
+
+  @media(max-width:380px){ .form-row{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>💻 Inventario</h1>
+    <p>Computadoras y Accesorios</p>
+  </header>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="🔍 Buscar producto...">
+    <div class="toolbar-row">
+      <select id="filterCat"><option value="">Todas las categorías</option></select>
+    </div>
+  </div>
+
+  <div class="cards" id="cards"></div>
+</div>
+
+<!-- Botón flotante agregar -->
+<button class="fab" onclick="openModal()" aria-label="Agregar">+</button>
+
+<!-- Menú exportar/importar -->
+<div class="bottom-menu">
+  <button class="icon-btn" onclick="exportJSON()" title="Exportar JSON">⬇</button>
+  <button class="icon-btn" onclick="exportCSV()" title="Exportar CSV">📄</button>
+  <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="Importar">⬆</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+</div>
+
+<!-- Modal formulario -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2 id="modalTitle">Agregar Producto</h2>
+    <input type="hidden" id="editId">
+    <div class="form-group">
+      <label>Nombre del producto *</label>
+      <input type="text" id="fNombre" placeholder="Ej: Laptop HP Pavilion">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Categoría *</label>
+        <select id="fCategoria">
+          <option>Computadora de Escritorio</option>
+          <option>Laptop</option>
+          <option>Monitor</option>
+          <option>Teclado</option>
+          <option>Mouse</option>
+          <option>Impresora</option>
+          <option>Tablet</option>
+          <option>Accesorio</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Marca</label>
+        <input type="text" id="fMarca" placeholder="HP, Dell...">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Modelo</label>
+        <input type="text" id="fModelo" placeholder="Ej: 15-fd0012">
+      </div>
+      <div class="form-group">
+        <label>Cantidad *</label>
+        <input type="number" id="fCantidad" min="0" value="1" inputmode="numeric">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>N° de Serie</label>
+      <div class="input-with-btn">
+        <input type="text" id="fSerie" placeholder="Escribe o usa la cámara">
+        <button type="button" class="cam-btn" onclick="openCamera()" aria-label="Escanear serie">📷</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Ubicación</label>
+      <input type="text" id="fUbicacion" placeholder="Ej: Almacén A">
+    </div>
+    <div class="form-group">
+      <label>Notas</label>
+      <input type="text" id="fNotas" placeholder="Observaciones opcionales">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-success" onclick="saveProduct()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Vista cámara para escanear / capturar serie -->
+<div class="cam-view" id="camView">
+  <video id="camVideo" playsinline autoplay muted></video>
+  <div class="cam-controls">
+    <button style="background:#ef4444;color:#fff" onclick="closeCamera()">Cancelar</button>
+    <button style="background:#10b981;color:#fff" onclick="capturePhoto()">📷 Capturar</button>
+  </div>
+</div>
+
+<!-- Canvas oculto para OCR -->
+<canvas id="ocrCanvas" style="display:none"></canvas>
+
+<script>
+let products = JSON.parse(localStorage.getItem('inventario_v1') || '[]');
+let editingId = null;
+let camStream = null;
+let ocrWorker = null;
+
+const $ = id => document.getElementById(id);
+const save = () => localStorage.setItem('inventario_v1', JSON.stringify(products));
+
+function openModal(id=null){
+  editingId = id;
+  $('modalTitle').textContent = id ? 'Editar Producto' : 'Agregar Producto';
+  if(id){
+    const p = products.find(x=>x.id===id);
+    $('editId').value=id; $('fNombre').value=p.nombre; $('fCategoria').value=p.categoria;
+    $('fMarca').value=p.marca||''; $('fModelo').value=p.modelo||''; $('fSerie').value=p.serie||'';
+    $('fCantidad').value=p.cantidad; $('fUbicacion').value=p.ubicacion||''; $('fNotas').value=p.notas||'';
+  } else {
+    ['fNombre','fMarca','fModelo','fSerie','fUbicacion','fNotas'].forEach(x=>$(x).value='');
+    $('fCantidad').value=1;
+  }
+  $('modalBg').classList.add('active');
+}
+function closeModal(){ $('modalBg').classList.remove('active'); }
+
+function saveProduct(){
+  const nombre = $('fNombre').value.trim();
+  if(!nombre){ alert('El nombre es obligatorio'); return; }
+  const data = {
+    nombre,
+    categoria: $('fCategoria').value,
+    marca: $('fMarca').value.trim(),
+    modelo: $('fModelo').value.trim(),
+    serie: $('fSerie').value.trim(),
+    cantidad: parseInt($('fCantidad').value)||0,
+    ubicacion: $('fUbicacion').value.trim(),
+    notas: $('fNotas').value.trim(),
+    updated: new Date().toISOString()
+  };
+  if(editingId){
+    const i = products.findIndex(x=>x.id===editingId);
+    products[i] = {...products[i], ...data};
+  } else {
+    data.id = Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    data.created = data.updated;
+    products.push(data);
+  }
+  save(); closeModal(); render();
+}
+
+function deleteProduct(id){
+  const p = products.find(x=>x.id===id);
+  if(confirm(`¿Eliminar "${p.nombre}"?`)){
+    products = products.filter(x=>x.id!==id);
+    save(); render();
+  }
+}
+
+function adjustStock(id, delta){
+  const p = products.find(x=>x.id===id);
+  p.cantidad = Math.max(0, p.cantidad + delta);
+  p.updated = new Date().toISOString();
+  save(); render();
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function render(){
+  const q = $('search').value.toLowerCase();
+  const fc = $('filterCat').value;
+
+  // Actualizar filtro de categorías
+  const cats = [...new Set(products.map(p=>p.categoria))].sort();
+  const sel = $('filterCat');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c=>`<option>${esc(c)}</option>`).join('');
+  sel.value = cur;
+
+  const filtered = products.filter(p=>{
+    const matchQ = !q || `${p.nombre} ${p.marca} ${p.modelo} ${p.serie}`.toLowerCase().includes(q);
+    const matchC = !fc || p.categoria===fc;
+    return matchQ && matchC;
+  });
+
+  const cont = $('cards');
+  if(!filtered.length){
+    cont.innerHTML = `<div class="empty"><div class="big">📦</div>No hay productos.<br>Toca <strong>+</strong> para agregar.</div>`;
+    return;
+  }
+
+  cont.innerHTML = filtered.map(p=>{
+    const ubic = p.ubicacion ? `<br>📍 ${esc(p.ubicacion)}` : '';
+    const serie = p.serie ? `<br>🔖 ${esc(p.serie)}` : '';
+    return `<div class="card">
+      <div class="card-head">
+        <div class="card-title">${esc(p.nombre)}</div>
+        <span class="card-badge badge-cat">${esc(p.categoria)}</span>
+      </div>
+      <div class="card-info">
+        ${p.marca||p.modelo ? `<strong>${esc(p.marca||'')}</strong> ${esc(p.modelo||'')}` : 'Sin marca/modelo'}
+        ${serie}${ubic}
+      </div>
+      <div class="stock-control">
+        <button onclick="adjustStock('${p.id}',-1)">−</button>
+        <div class="count">${p.cantidad}</div>
+        <button onclick="adjustStock('${p.id}',1)">+</button>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openModal('${p.id}')">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑 Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============ CÁMARA + OCR ============ */
+async function openCamera(){
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width:{ideal:1280}, height:{ideal:720} },
+      audio: false
+    });
+    const v = $('camVideo');
+    v.srcObject = camStream;
+    await v.play();
+    $('camView').classList.add('active');
+  } catch(err){
+    alert('No se pudo abrir la cámara.\n\nAsegúrate de:\n• Usar HTTPS o localhost\n• Dar permiso de cámara al navegador\n\nPuedes escribir el número de serie manualmente.');
+    console.error(err);
+  }
+}
+
+function closeCamera(){
+  if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+  $('camView').classList.remove('active');
+}
+
+async function capturePhoto(){
+  const v = $('camVideo');
+  const canvas = $('ocrCanvas');
+  const w = v.videoWidth, h = v.videoHeight;
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(v, 0, 0, w, h);
+
+  closeCamera();
+  $('fSerie').value = '⏳ Leyendo...';
+
+  try {
+    const text = await recognizeText(canvas);
+    const clean = (text || '').replace(/\s+/g,' ').trim();
+    // Filtra caracteres válidos de números de serie (letras mayúsculas, números y guiones)
+    const serie = clean.replace(/[^A-Z0-9\-]/gi,'').toUpperCase().slice(0,40);
+    $('fSerie').value = serie || clean || '';
+    if(!serie && !clean){
+      alert('No se detectó texto. Intenta con más luz o escribe el número manualmente.');
+      $('fSerie').value = '';
+    }
+  } catch(err){
+    console.error(err);
+    $('fSerie').value = '';
+    alert('No se pudo leer el texto. Puedes escribirlo manualmente.');
+  }
+}
+
+async function recognizeText(canvas){
+  // Usa Tesseract.js desde CDN (se carga on-demand)
+  if(!window.Tesseract){
+    await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+  }
+  const { data } = await window.Tesseract.recognize(canvas, 'eng', {
+    logger: m => { if(m.status==='recognizing text') $('fSerie').value = `⏳ ${Math.round(m.progress*100)}%`; }
+  });
+  return data.text;
+}
+
+function loadScript(src){
+  return new Promise((res,rej)=>{
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+/* ============ EXPORTAR / IMPORTAR ============ */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(products,null,2)],{type:'application/json'});
+  download(blob, `inventario_${date()}.json`);
+}
+function exportCSV(){
+  const rows = [['Nombre','Categoría','Marca','Modelo','Serie','Cantidad','Ubicación','Notas']];
+  products.forEach(p=>rows.push([p.nombre,p.categoria,p.marca,p.modelo,p.serie,p.cantidad,p.ubicacion,p.notas]));
+  const csv = rows.map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  download(new Blob(["\ufeff"+csv],{type:'text/csv;charset=utf-8'}), `inventario_${date()}.csv`);
+}
+function download(blob,name){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+}
+function importJSON(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(!Array.isArray(data)) throw 0;
+      if(confirm(`¿Importar ${data.length} productos? Se agregarán a los existentes.`)){
+        data.forEach(p=>{ p.id = p.id || Date.now().toString(36)+Math.random().toString(36).slice(2,6); products.push(p); });
+        save(); render();
+      }
+    } catch { alert('Archivo inválido'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+function date(){ return new Date().toISOString().slice(0,10); }
+
+['search','filterCat'].forEach(id=>$(id).addEventListener('input',render));
+render();
+</script>
+</body>
+</html>
