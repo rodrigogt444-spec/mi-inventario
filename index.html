@@ -2,409 +2,806 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Inventario Móvil</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUINIELAS MEXICO</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; -webkit-tap-highlight-color:transparent; }
-  body { background:#f0f2f5; color:#1a1a1a; padding:12px; padding-bottom:90px; }
-  .container { max-width:1200px; margin:0 auto; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  header { background:linear-gradient(135deg,#2563eb,#1e40af); color:#fff; padding:18px; border-radius:12px; margin-bottom:14px; box-shadow:0 4px 12px rgba(37,99,235,.3); }
-  header h1 { font-size:1.2rem; }
-  header p { opacity:.9; font-size:.82rem; margin-top:2px; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+        background: #ffffff;
+        background-image:
+            radial-gradient(circle at 0% 0%, rgba(255, 71, 87, 0.08) 0%, transparent 35%),
+            radial-gradient(circle at 100% 0%, rgba(52, 152, 219, 0.08) 0%, transparent 35%),
+            radial-gradient(circle at 50% 100%, rgba(46, 204, 113, 0.08) 0%, transparent 40%);
+        min-height: 100vh;
+        padding: 18px;
+        color: #1e293b;
+    }
 
-  /* Toolbar búsqueda */
-  .toolbar { background:#fff; padding:12px; border-radius:10px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
-  .toolbar input, .toolbar select { padding:12px; border:1px solid #e2e8f0; border-radius:8px; font-size:1rem; width:100%; }
-  .toolbar input:focus, .toolbar select:focus { outline:none; border-color:#2563eb; }
-  .toolbar-row { display:flex; gap:8px; }
-  .toolbar-row select { flex:1; }
+    .contenedor {
+        max-width: 720px;
+        margin: 0 auto;
+    }
 
-  /* Botón flotante agregar */
-  .fab { position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:#2563eb; color:#fff; border:none; font-size:2rem; cursor:pointer; box-shadow:0 6px 20px rgba(37,99,235,.5); display:flex; align-items:center; justify-content:center; z-index:50; transition:.2s; }
-  .fab:active { transform:scale(.92); }
+    /* ENCABEZADO */
+    header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 24px 20px;
+        background: #ffffff;
+        border: 2px solid #f1f5f9;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(30, 41, 59, 0.06);
+    }
 
-  /* Menú inferior opciones */
-  .bottom-menu { position:fixed; bottom:20px; left:20px; display:flex; gap:8px; z-index:50; }
-  .icon-btn { width:48px; height:48px; border-radius:50%; background:#fff; color:#475569; border:none; font-size:1.2rem; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.15); display:flex; align-items:center; justify-content:center; }
-  .icon-btn:active { transform:scale(.92); }
+    header::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 5px;
+        background: linear-gradient(90deg,
+            #ff4757 0%, #ffa502 25%,
+            #2ed573 50%, #1e90ff 75%,
+            #a55eea 100%);
+        background-size: 200% 100%;
+        animation: barra 6s linear infinite;
+    }
 
-  /* Tarjetas de productos */
-  .cards { display:flex; flex-direction:column; gap:10px; }
-  .card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,.06); border-left:4px solid #2563eb; }
-  .card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px; }
-  .card-title { font-weight:700; font-size:1rem; line-height:1.3; flex:1; }
-  .card-badge { padding:4px 10px; border-radius:20px; font-size:.72rem; font-weight:700; white-space:nowrap; }
-  .badge-cat { background:#e0e7ff; color:#3730a3; }
-  .card-info { font-size:.85rem; color:#64748b; margin-bottom:8px; line-height:1.5; }
-  .card-info strong { color:#334155; }
-  .card-actions { display:flex; gap:8px; margin-top:10px; }
-  .card-actions .btn { flex:1; padding:10px; font-size:.9rem; }
+    @keyframes barra {
+        0%   { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
+    }
 
-  .stock-control { display:flex; align-items:center; gap:10px; background:#f8fafc; border-radius:8px; padding:6px; }
-  .stock-control button { width:38px; height:38px; border-radius:8px; border:none; background:#e2e8f0; color:#1e293b; font-size:1.3rem; font-weight:700; cursor:pointer; }
-  .stock-control button:active { background:#cbd5e1; }
-  .stock-control .count { flex:1; text-align:center; font-size:1.2rem; font-weight:700; color:#1e293b; }
+    header h1 {
+        font-size: 26px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ff4757, #1e90ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 6px;
+    }
 
-  .btn { padding:10px 14px; border:none; border-radius:8px; font-weight:600; font-size:.9rem; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
-  .btn-primary { background:#2563eb; color:#fff; }
-  .btn-success { background:#10b981; color:#fff; }
-  .btn-danger { background:#ef4444; color:#fff; }
-  .btn-ghost { background:#f1f5f9; color:#475569; }
-  .btn-sm { padding:8px 10px; font-size:.85rem; }
+    header h2 {
+        font-size: 13px;
+        font-weight: 700;
+        color: #94a3b8;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
 
-  .empty { text-align:center; padding:50px 20px; color:#94a3b8; background:#fff; border-radius:12px; }
-  .empty .big { font-size:3rem; margin-bottom:10px; }
+    /* CAMPO DE NOMBRE */
+    .campo-nombre {
+        background: #ffffff;
+        border: 2px solid #f1f5f9;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+        box-shadow: 0 6px 20px rgba(30, 41, 59, 0.05);
+        position: relative;
+    }
 
-  /* Modal */
-  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:flex-end; justify-content:center; z-index:200; }
-  .modal-bg.active { display:flex; }
-  .modal { background:#fff; border-radius:16px 16px 0 0; padding:20px; width:100%; max-width:600px; max-height:92vh; overflow-y:auto; }
-  .modal h2 { margin-bottom:16px; font-size:1.15rem; }
-  .form-group { margin-bottom:14px; }
-  .form-group label { display:block; font-size:.85rem; font-weight:600; margin-bottom:6px; color:#334155; }
-  .form-group input, .form-group select { width:100%; padding:13px; border:1px solid #e2e8f0; border-radius:10px; font-size:1rem; background:#fff; }
-  .form-group input:focus, .form-group select:focus { outline:none; border-color:#2563eb; }
-  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .campo-nombre::before {
+        content: "";
+        position: absolute;
+        left: 0; top: 15%; bottom: 15%;
+        width: 4px;
+        background: linear-gradient(180deg, #ff4757, #ffa502);
+        border-radius: 0 4px 4px 0;
+    }
 
-  /* Input con botón cámara */
-  .input-with-btn { display:flex; gap:8px; }
-  .input-with-btn input { flex:1; }
-  .cam-btn { width:52px; min-width:52px; border:none; border-radius:10px; background:#2563eb; color:#fff; font-size:1.4rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .cam-btn:active { background:#1e40af; }
+    .campo-nombre label {
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        color: #64748b;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        padding-left: 6px;
+    }
 
-  .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; padding-top:16px; border-top:1px solid #f1f5f9; }
-  .modal-actions .btn { flex:1; padding:14px; font-size:1rem; }
+    .campo-nombre input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid #f1f5f9;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e293b;
+        background: #f8fafc;
+        outline: none;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
 
-  /* Video cámara */
-  .cam-view { position:fixed; inset:0; background:#000; z-index:300; display:none; flex-direction:column; }
-  .cam-view.active { display:flex; }
-  .cam-view video { flex:1; width:100%; object-fit:cover; }
-  .cam-view .cam-controls { padding:20px; background:#000; display:flex; gap:12px; justify-content:center; }
-  .cam-view .cam-controls button { padding:14px 24px; border:none; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer; }
+    .campo-nombre input::placeholder {
+        color: #cbd5e1;
+        font-weight: 500;
+    }
 
-  @media(max-width:380px){ .form-row{grid-template-columns:1fr;} }
+    .campo-nombre input:focus {
+        border-color: #1e90ff;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(30, 144, 255, 0.12);
+    }
+
+    /* PARTIDO */
+    .partido {
+        background: #ffffff;
+        border: 2px solid #f1f5f9;
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 8px;
+        transition: all 0.25s;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 3px 10px rgba(30, 41, 59, 0.04);
+    }
+
+    .partido::before {
+        content: "";
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #2ed573, #1e90ff);
+        opacity: 0;
+        transition: opacity 0.25s;
+    }
+
+    .partido.seleccionado::before { opacity: 1; }
+
+    .partido.seleccionado {
+        border-color: #b9f0cb;
+        background: #f4fdf7;
+    }
+
+    .partido:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(30, 41, 59, 0.08);
+    }
+
+    .equipos {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .equipo {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        font-size: 13.5px;
+        min-width: 0;
+        letter-spacing: 0.3px;
+        color: #1e293b;
+    }
+
+    .equipo.visitante {
+        flex-direction: row-reverse;
+        text-align: right;
+    }
+
+    .escudo {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 12px;
+        color: #fff;
+        flex-shrink: 0;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+    }
+
+    .nombre-equipo {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .vs {
+        font-size: 10px;
+        font-weight: 900;
+        color: #94a3b8;
+        padding: 4px 7px;
+        border: 2px solid #f1f5f9;
+        border-radius: 6px;
+        background: #f8fafc;
+        letter-spacing: 1px;
+    }
+
+    /* OPCIONES L E V */
+    .opciones {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 6px;
+    }
+
+    .opcion {
+        padding: 10px;
+        border: 2px solid #f1f5f9;
+        background: #f8fafc;
+        color: #94a3b8;
+        border-radius: 10px;
+        font-weight: 900;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 2px;
+        font-family: inherit;
+    }
+
+    .opcion:hover {
+        background: #eef2f7;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+
+    .opcion.local.seleccionada {
+        background: linear-gradient(135deg, #2ed573, #17a94a);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(46, 213, 115, 0.4);
+    }
+
+    .opcion.empate.seleccionada {
+        background: linear-gradient(135deg, #ffa502, #ff7f00);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(255, 165, 2, 0.4);
+    }
+
+    .opcion.visitante.seleccionada {
+        background: linear-gradient(135deg, #1e90ff, #0066cc);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(30, 144, 255, 0.4);
+    }
+
+    /* INFO */
+    .info {
+        background: linear-gradient(135deg, #f8fafc, #ffffff);
+        border: 2px solid #f1f5f9;
+        border-radius: 16px;
+        padding: 16px;
+        text-align: center;
+        margin-top: 16px;
+        box-shadow: 0 6px 20px rgba(30, 41, 59, 0.05);
+    }
+
+    .precio {
+        color: #ff7f00;
+        font-weight: 900;
+        font-size: 13px;
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
+    }
+
+    .informes {
+        font-size: 13px;
+        margin-bottom: 8px;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .informes strong { color: #2ed573; }
+
+    .total {
+        font-size: 26px;
+        font-weight: 900;
+        background: linear-gradient(135deg, #2ed573, #1e90ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 1px;
+    }
+
+    .contador {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-top: 4px;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+    }
+
+    /* BOTONES PEQUEÑOS (3 EN LÍNEA) */
+    .acciones-pequenas {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        margin-top: 16px;
+    }
+
+    .btn-peq {
+        padding: 10px 6px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 11.5px;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 0.5px;
+        color: #fff;
+        text-transform: uppercase;
+        font-family: inherit;
+        white-space: nowrap;
+    }
+
+    .btn-peq:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(30, 41, 59, 0.18);
+    }
+
+    .btn-peq:active { transform: translateY(0); }
+
+    .btn-limpiar {
+        background: linear-gradient(135deg, #94a3b8, #64748b);
+    }
+
+    .btn-agregar {
+        background: linear-gradient(135deg, #1e90ff, #0066cc);
+    }
+
+    .btn-aleatorio {
+        background: linear-gradient(135deg, #ffa502, #ff7f00);
+    }
+
+    /* BOTÓN ENVIAR (GRANDE) */
+    .btn-enviar {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 14px;
+        font-weight: 900;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.25s;
+        letter-spacing: 1.5px;
+        color: #fff;
+        text-transform: uppercase;
+        font-family: inherit;
+        background: linear-gradient(135deg, #25D366, #128C7E);
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+        margin-top: 10px;
+    }
+
+    .btn-enviar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(37, 211, 102, 0.5);
+    }
+
+    .btn-enviar:active { transform: translateY(0); }
+
+    /* LISTA DE PRONÓSTICOS GUARDADOS */
+    .lista-pronosticos {
+        margin-top: 14px;
+        background: #ffffff;
+        border: 2px solid #f1f5f9;
+        border-radius: 16px;
+        padding: 14px 16px;
+        box-shadow: 0 6px 20px rgba(30, 41, 59, 0.05);
+        display: none;
+    }
+
+    .lista-pronosticos.visible { display: block; }
+
+    .lista-pronosticos h3 {
+        font-size: 11px;
+        font-weight: 900;
+        color: #64748b;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 2px dashed #e2e8f0;
+    }
+
+    .item-pronostico {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: #f8fafc;
+        border-radius: 10px;
+        margin-bottom: 6px;
+        border-left: 4px solid #1e90ff;
+        transition: all 0.2s;
+    }
+
+    .item-pronostico:hover {
+        background: #eef3f9;
+    }
+
+    .item-pronostico .num {
+        background: linear-gradient(135deg, #1e293b, #334155);
+        color: #fff;
+        font-weight: 900;
+        font-size: 12px;
+        min-width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .item-pronostico .letras {
+        font-weight: 900;
+        font-size: 14px;
+        color: #1e293b;
+        letter-spacing: 3px;
+        flex: 1;
+        font-family: 'Courier New', monospace;
+    }
+
+    .item-pronostico .borrar-item {
+        background: rgba(255, 71, 87, 0.1);
+        color: #ff4757;
+        border: 1px solid rgba(255, 71, 87, 0.25);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .item-pronostico .borrar-item:hover {
+        background: #ff4757;
+        color: #fff;
+    }
+
+    /* ALERTA */
+    .alerta {
+        position: fixed;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-120px);
+        background: #ff4757;
+        color: #fff;
+        padding: 13px 22px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 13.5px;
+        box-shadow: 0 10px 30px rgba(255, 71, 87, 0.35);
+        transition: transform 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        z-index: 1000;
+        max-width: 90%;
+        text-align: center;
+        letter-spacing: 0.3px;
+    }
+
+    .alerta.mostrar { transform: translateX(-50%) translateY(0); }
+
+    .alerta.exito {
+        background: linear-gradient(135deg, #2ed573, #17a94a);
+        box-shadow: 0 10px 30px rgba(46, 213, 115, 0.4);
+    }
+
+    @media (max-width: 480px) {
+        header h1 { font-size: 19px; letter-spacing: 2px; }
+        header h2 { font-size: 11px; }
+        .nombre-equipo { font-size: 11.5px; }
+        .escudo { width: 30px; height: 30px; font-size: 10px; }
+        .opcion { padding: 8px; font-size: 12px; }
+        .btn-peq { font-size: 10.5px; padding: 9px 4px; }
+        .total { font-size: 22px; }
+        .btn-enviar { font-size: 13px; padding: 14px; }
+        .item-pronostico .letras { font-size: 12px; letter-spacing: 2px; }
+    }
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>💻 Inventario</h1>
-    <p>Computadoras y Accesorios</p>
-  </header>
 
-  <div class="toolbar">
-    <input type="text" id="search" placeholder="🔍 Buscar producto...">
-    <div class="toolbar-row">
-      <select id="filterCat"><option value="">Todas las categorías</option></select>
+<div class="contenedor">
+
+    <header>
+        <h1>QUINIELAS MEXICO</h1>
+        <h2>LIGA MX · JORNADA 12</h2>
+    </header>
+
+    <!-- CAMPO DE NOMBRE -->
+    <div class="campo-nombre">
+        <label for="nombreJugador">👤 Nombre del jugador</label>
+        <input
+            type="text"
+            id="nombreJugador"
+            placeholder="Escribe tu nombre aquí..."
+            autocomplete="off"
+        >
     </div>
-  </div>
 
-  <div class="cards" id="cards"></div>
+    <!-- PARTIDOS (solo la quiniela ACTIVA) -->
+    <div id="listaPartidos"></div>
+
+    <!-- INFO -->
+    <div class="info">
+        <p class="precio">$20.00 POR QUINIELA &nbsp;|&nbsp; CIERRE: VIERNES 2:00 P.M.</p>
+        <p class="informes">Informes: <strong>+52 563 070 1352</strong></p>
+        <p class="total">TOTAL: $<span id="total">0.00</span></p>
+        <p class="contador" id="contador">0 quiniela(s)</p>
+    </div>
+
+    <!-- BOTONES PEQUEÑOS -->
+    <div class="acciones-pequenas">
+        <button class="btn-peq btn-limpiar" onclick="limpiar()">🧹 Limpiar</button>
+        <button class="btn-peq btn-agregar" onclick="agregarQuiniela()">➕ Agregar</button>
+        <button class="btn-peq btn-aleatorio" onclick="aleatorio()">🎲 Aleatorio</button>
+    </div>
+
+    <!-- BOTÓN ENVIAR -->
+    <button class="btn-enviar" onclick="enviar()">📲 Enviar por WhatsApp</button>
+
+    <!-- LISTA DE PRONÓSTICOS GUARDADOS -->
+    <div class="lista-pronosticos" id="listaPronosticos">
+        <h3>📋 Pronósticos guardados</h3>
+        <div id="itemsPronosticos"></div>
+    </div>
+
 </div>
 
-<!-- Botón flotante agregar -->
-<button class="fab" onclick="openModal()" aria-label="Agregar">+</button>
-
-<!-- Menú exportar/importar -->
-<div class="bottom-menu">
-  <button class="icon-btn" onclick="exportJSON()" title="Exportar JSON">⬇</button>
-  <button class="icon-btn" onclick="exportCSV()" title="Exportar CSV">📄</button>
-  <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="Importar">⬆</button>
-  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
-</div>
-
-<!-- Modal formulario -->
-<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2 id="modalTitle">Agregar Producto</h2>
-    <input type="hidden" id="editId">
-    <div class="form-group">
-      <label>Nombre del producto *</label>
-      <input type="text" id="fNombre" placeholder="Ej: Laptop HP Pavilion">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Categoría *</label>
-        <select id="fCategoria">
-          <option>Computadora de Escritorio</option>
-          <option>Laptop</option>
-          <option>Monitor</option>
-          <option>Teclado</option>
-          <option>Mouse</option>
-          <option>Impresora</option>
-          <option>Tablet</option>
-          <option>Accesorio</option>
-          <option>Otro</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Marca</label>
-        <input type="text" id="fMarca" placeholder="HP, Dell...">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Modelo</label>
-        <input type="text" id="fModelo" placeholder="Ej: 15-fd0012">
-      </div>
-      <div class="form-group">
-        <label>Cantidad *</label>
-        <input type="number" id="fCantidad" min="0" value="1" inputmode="numeric">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>N° de Serie</label>
-      <div class="input-with-btn">
-        <input type="text" id="fSerie" placeholder="Escribe o usa la cámara">
-        <button type="button" class="cam-btn" onclick="openCamera()" aria-label="Escanear serie">📷</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Ubicación</label>
-      <input type="text" id="fUbicacion" placeholder="Ej: Almacén A">
-    </div>
-    <div class="form-group">
-      <label>Notas</label>
-      <input type="text" id="fNotas" placeholder="Observaciones opcionales">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-success" onclick="saveProduct()">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Vista cámara para escanear / capturar serie -->
-<div class="cam-view" id="camView">
-  <video id="camVideo" playsinline autoplay muted></video>
-  <div class="cam-controls">
-    <button style="background:#ef4444;color:#fff" onclick="closeCamera()">Cancelar</button>
-    <button style="background:#10b981;color:#fff" onclick="capturePhoto()">📷 Capturar</button>
-  </div>
-</div>
-
-<!-- Canvas oculto para OCR -->
-<canvas id="ocrCanvas" style="display:none"></canvas>
+<div class="alerta" id="alerta"></div>
 
 <script>
-let products = JSON.parse(localStorage.getItem('inventario_v1') || '[]');
-let editingId = null;
-let camStream = null;
-let ocrWorker = null;
+/* ============================================================
+   CONFIGURACIÓN
+   ============================================================ */
+const PRECIO_QUINIELA = 20;
+const WHATSAPP        = "5630701352";
+const MAX_QUINIELAS   = 10;
 
-const $ = id => document.getElementById(id);
-const save = () => localStorage.setItem('inventario_v1', JSON.stringify(products));
+const partidos = [
+    "NECAXA|ATLAS",
+    "ATLANTE|PUMAS",
+    "TIJUANA|PUEBLA",
+    "SANTOS|QUERÉTARO",
+    "CHIVAS|TIGRES",
+    "LEÓN|AMÉRICA",
+    "TOLUCA|SAN LUIS",
+    "CRUZ AZUL|JUÁREZ",
+    "MONTERREY|PACHUCA"
+];
 
-function openModal(id=null){
-  editingId = id;
-  $('modalTitle').textContent = id ? 'Editar Producto' : 'Agregar Producto';
-  if(id){
-    const p = products.find(x=>x.id===id);
-    $('editId').value=id; $('fNombre').value=p.nombre; $('fCategoria').value=p.categoria;
-    $('fMarca').value=p.marca||''; $('fModelo').value=p.modelo||''; $('fSerie').value=p.serie||'';
-    $('fCantidad').value=p.cantidad; $('fUbicacion').value=p.ubicacion||''; $('fNotas').value=p.notas||'';
-  } else {
-    ['fNombre','fMarca','fModelo','fSerie','fUbicacion','fNotas'].forEach(x=>$(x).value='');
-    $('fCantidad').value=1;
-  }
-  $('modalBg').classList.add('active');
-}
-function closeModal(){ $('modalBg').classList.remove('active'); }
+const coloresEquipos = {
+    "NECAXA":"#E30613","ATLAS":"#CC0000","ATLANTE":"#0055A4","PUMAS":"#002B5C",
+    "TIJUANA":"#D40026","PUEBLA":"#003366","SANTOS":"#007A33","QUERÉTARO":"#0033A0",
+    "CHIVAS":"#C8102E","TIGRES":"#FFB81C","LEÓN":"#007A33","AMÉRICA":"#FFCC00",
+    "TOLUCA":"#D40026","SAN LUIS":"#003DA5","CRUZ AZUL":"#0033A0","JUÁREZ":"#00A94F",
+    "MONTERREY":"#0033A0","PACHUCA":"#003DA5"
+};
 
-function saveProduct(){
-  const nombre = $('fNombre').value.trim();
-  if(!nombre){ alert('El nombre es obligatorio'); return; }
-  const data = {
-    nombre,
-    categoria: $('fCategoria').value,
-    marca: $('fMarca').value.trim(),
-    modelo: $('fModelo').value.trim(),
-    serie: $('fSerie').value.trim(),
-    cantidad: parseInt($('fCantidad').value)||0,
-    ubicacion: $('fUbicacion').value.trim(),
-    notas: $('fNotas').value.trim(),
-    updated: new Date().toISOString()
-  };
-  if(editingId){
-    const i = products.findIndex(x=>x.id===editingId);
-    products[i] = {...products[i], ...data};
-  } else {
-    data.id = Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-    data.created = data.updated;
-    products.push(data);
-  }
-  save(); closeModal(); render();
+/* ============================================================
+   ESTADO
+   ============================================================ */
+// Selección de la quiniela ACTIVA (la que se ve en la pantalla)
+let seleccionActual = {};
+
+// Quinielas ya GUARDADAS con el botón Agregar
+// guardadas = [ { id: 1, pronosticos: ["L","E","V",...] }, ... ]
+let guardadas = [];
+let siguienteId = 1;
+
+/* ============================================================
+   RENDER DE PARTIDOS (solo la activa)
+   ============================================================ */
+function obtenerIniciales(nombre) {
+    const partes = nombre.split(" ");
+    if (partes.length === 1) return nombre.substring(0, 2).toUpperCase();
+    return (partes[0][0] + partes[1][0]).toUpperCase();
 }
 
-function deleteProduct(id){
-  const p = products.find(x=>x.id===id);
-  if(confirm(`¿Eliminar "${p.nombre}"?`)){
-    products = products.filter(x=>x.id!==id);
-    save(); render();
-  }
-}
+function renderPartidos() {
+    const cont = document.getElementById("listaPartidos");
+    cont.innerHTML = "";
 
-function adjustStock(id, delta){
-  const p = products.find(x=>x.id===id);
-  p.cantidad = Math.max(0, p.cantidad + delta);
-  p.updated = new Date().toISOString();
-  save(); render();
-}
+    partidos.forEach((partido, index) => {
+        const [local, visitante] = partido.split("|");
+        const sel = seleccionActual[index] || null;
 
-function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+        const card = document.createElement("div");
+        card.className = "partido" + (sel ? " seleccionado" : "");
 
-function render(){
-  const q = $('search').value.toLowerCase();
-  const fc = $('filterCat').value;
-
-  // Actualizar filtro de categorías
-  const cats = [...new Set(products.map(p=>p.categoria))].sort();
-  const sel = $('filterCat');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c=>`<option>${esc(c)}</option>`).join('');
-  sel.value = cur;
-
-  const filtered = products.filter(p=>{
-    const matchQ = !q || `${p.nombre} ${p.marca} ${p.modelo} ${p.serie}`.toLowerCase().includes(q);
-    const matchC = !fc || p.categoria===fc;
-    return matchQ && matchC;
-  });
-
-  const cont = $('cards');
-  if(!filtered.length){
-    cont.innerHTML = `<div class="empty"><div class="big">📦</div>No hay productos.<br>Toca <strong>+</strong> para agregar.</div>`;
-    return;
-  }
-
-  cont.innerHTML = filtered.map(p=>{
-    const ubic = p.ubicacion ? `<br>📍 ${esc(p.ubicacion)}` : '';
-    const serie = p.serie ? `<br>🔖 ${esc(p.serie)}` : '';
-    return `<div class="card">
-      <div class="card-head">
-        <div class="card-title">${esc(p.nombre)}</div>
-        <span class="card-badge badge-cat">${esc(p.categoria)}</span>
-      </div>
-      <div class="card-info">
-        ${p.marca||p.modelo ? `<strong>${esc(p.marca||'')}</strong> ${esc(p.modelo||'')}` : 'Sin marca/modelo'}
-        ${serie}${ubic}
-      </div>
-      <div class="stock-control">
-        <button onclick="adjustStock('${p.id}',-1)">−</button>
-        <div class="count">${p.cantidad}</div>
-        <button onclick="adjustStock('${p.id}',1)">+</button>
-      </div>
-      <div class="card-actions">
-        <button class="btn btn-ghost btn-sm" onclick="openModal('${p.id}')">✏️ Editar</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑 Eliminar</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ============ CÁMARA + OCR ============ */
-async function openCamera(){
-  try {
-    camStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width:{ideal:1280}, height:{ideal:720} },
-      audio: false
+        card.innerHTML = `
+            <div class="equipos">
+                <div class="equipo local">
+                    <div class="escudo" style="background:${coloresEquipos[local] || '#555'}">${obtenerIniciales(local)}</div>
+                    <span class="nombre-equipo">${local}</span>
+                </div>
+                <span class="vs">VS</span>
+                <div class="equipo visitante">
+                    <div class="escudo" style="background:${coloresEquipos[visitante] || '#555'}">${obtenerIniciales(visitante)}</div>
+                    <span class="nombre-equipo">${visitante}</span>
+                </div>
+            </div>
+            <div class="opciones">
+                <button class="opcion local ${sel === 'L' ? 'seleccionada' : ''}" onclick="marcar(${index},'L')">L</button>
+                <button class="opcion empate ${sel === 'E' ? 'seleccionada' : ''}" onclick="marcar(${index},'E')">E</button>
+                <button class="opcion visitante ${sel === 'V' ? 'seleccionada' : ''}" onclick="marcar(${index},'V')">V</button>
+            </div>
+        `;
+        cont.appendChild(card);
     });
-    const v = $('camVideo');
-    v.srcObject = camStream;
-    await v.play();
-    $('camView').classList.add('active');
-  } catch(err){
-    alert('No se pudo abrir la cámara.\n\nAsegúrate de:\n• Usar HTTPS o localhost\n• Dar permiso de cámara al navegador\n\nPuedes escribir el número de serie manualmente.');
-    console.error(err);
-  }
+
+    actualizarInfo();
 }
 
-function closeCamera(){
-  if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
-  $('camView').classList.remove('active');
-}
+/* ============================================================
+   RENDER DE LA LISTA DE PRONÓSTICOS GUARDADOS
+   ============================================================ */
+function renderListaGuardadas() {
+    const cont = document.getElementById("itemsPronosticos");
+    const wrapper = document.getElementById("listaPronosticos");
 
-async function capturePhoto(){
-  const v = $('camVideo');
-  const canvas = $('ocrCanvas');
-  const w = v.videoWidth, h = v.videoHeight;
-  canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(v, 0, 0, w, h);
+    cont.innerHTML = "";
 
-  closeCamera();
-  $('fSerie').value = '⏳ Leyendo...';
-
-  try {
-    const text = await recognizeText(canvas);
-    const clean = (text || '').replace(/\s+/g,' ').trim();
-    // Filtra caracteres válidos de números de serie (letras mayúsculas, números y guiones)
-    const serie = clean.replace(/[^A-Z0-9\-]/gi,'').toUpperCase().slice(0,40);
-    $('fSerie').value = serie || clean || '';
-    if(!serie && !clean){
-      alert('No se detectó texto. Intenta con más luz o escribe el número manualmente.');
-      $('fSerie').value = '';
+    if (guardadas.length === 0) {
+        wrapper.classList.remove("visible");
+        return;
     }
-  } catch(err){
-    console.error(err);
-    $('fSerie').value = '';
-    alert('No se pudo leer el texto. Puedes escribirlo manualmente.');
-  }
+
+    wrapper.classList.add("visible");
+
+    guardadas.forEach((q, idx) => {
+        const item = document.createElement("div");
+        item.className = "item-pronostico";
+
+        const letras = q.pronosticos.join(" ");
+
+        item.innerHTML = `
+            <div class="num">${q.id}</div>
+            <div class="letras">${letras}</div>
+            <button class="borrar-item" onclick="borrarGuardada(${idx})">✕</button>
+        `;
+        cont.appendChild(item);
+    });
 }
 
-async function recognizeText(canvas){
-  // Usa Tesseract.js desde CDN (se carga on-demand)
-  if(!window.Tesseract){
-    await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
-  }
-  const { data } = await window.Tesseract.recognize(canvas, 'eng', {
-    logger: m => { if(m.status==='recognizing text') $('fSerie').value = `⏳ ${Math.round(m.progress*100)}%`; }
-  });
-  return data.text;
+/* ============================================================
+   INFO (TOTAL)
+   ============================================================ */
+function actualizarInfo() {
+    const total = guardadas.length * PRECIO_QUINIELA;
+    document.getElementById("total").textContent = total.toFixed(2);
+    document.getElementById("contador").textContent =
+        `${guardadas.length} quiniela(s)`;
 }
 
-function loadScript(src){
-  return new Promise((res,rej)=>{
-    const s = document.createElement('script');
-    s.src = src; s.onload = res; s.onerror = rej;
-    document.head.appendChild(s);
-  });
+/* ============================================================
+   ACCIONES
+   ============================================================ */
+function marcar(index, tipo) {
+    if (seleccionActual[index] === tipo) {
+        delete seleccionActual[index];
+    } else {
+        seleccionActual[index] = tipo;
+    }
+    renderPartidos();
 }
 
-/* ============ EXPORTAR / IMPORTAR ============ */
-function exportJSON(){
-  const blob = new Blob([JSON.stringify(products,null,2)],{type:'application/json'});
-  download(blob, `inventario_${date()}.json`);
-}
-function exportCSV(){
-  const rows = [['Nombre','Categoría','Marca','Modelo','Serie','Cantidad','Ubicación','Notas']];
-  products.forEach(p=>rows.push([p.nombre,p.categoria,p.marca,p.modelo,p.serie,p.cantidad,p.ubicacion,p.notas]));
-  const csv = rows.map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-  download(new Blob(["\ufeff"+csv],{type:'text/csv;charset=utf-8'}), `inventario_${date()}.csv`);
-}
-function download(blob,name){
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
-}
-function importJSON(e){
-  const file = e.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const data = JSON.parse(ev.target.result);
-      if(!Array.isArray(data)) throw 0;
-      if(confirm(`¿Importar ${data.length} productos? Se agregarán a los existentes.`)){
-        data.forEach(p=>{ p.id = p.id || Date.now().toString(36)+Math.random().toString(36).slice(2,6); products.push(p); });
-        save(); render();
-      }
-    } catch { alert('Archivo inválido'); }
-  };
-  reader.readAsText(file);
-  e.target.value='';
-}
-function date(){ return new Date().toISOString().slice(0,10); }
+function agregarQuiniela() {
+    const numSel = Object.keys(seleccionActual).length;
 
-['search','filterCat'].forEach(id=>$(id).addEventListener('input',render));
-render();
+    // VALIDACIÓN: debe estar completa
+    if (numSel < partidos.length) {
+        mostrarAlerta(`⚠️ Completa los ${partidos.length} partidos antes de agregar`);
+        return;
+    }
+
+    if (guardadas.length >= MAX_QUINIELAS) {
+        mostrarAlerta(`Máximo ${MAX_QUINIELAS} quinielas`);
+        return;
+    }
+
+    // Guardar la quiniela activa con su ID
+    const pronosticos = partidos.map((_, i) => seleccionActual[i]);
+    guardadas.push({ id: siguienteId, pronosticos });
+    siguienteId++;
+
+    // Limpiar selección activa para la siguiente quiniela
+    seleccionActual = {};
+
+    renderPartidos();
+    renderListaGuardadas();
+    actualizarInfo();
+    mostrarAlerta(`✅ Quiniela #${siguienteId - 1} guardada`, true);
+}
+
+function borrarGuardada(index) {
+    // Renumerar los siguientes IDs
+    guardadas.splice(index, 1);
+    renderListaGuardadas();
+    actualizarInfo();
+    mostrarAlerta("Quiniela eliminada");
+}
+
+function limpiar() {
+    seleccionActual = {};
+    guardadas = [];
+    siguienteId = 1;
+    document.getElementById("nombreJugador").value = "";
+    renderPartidos();
+    renderListaGuardadas();
+    actualizarInfo();
+    mostrarAlerta("Todo limpiado");
+}
+
+function aleatorio() {
+    const opciones = ["L", "E", "V"];
+    seleccionActual = {};
+    partidos.forEach((_, i) => {
+        seleccionActual[i] = opciones[Math.floor(Math.random() * 3)];
+    });
+    renderPartidos();
+    mostrarAlerta("Combinación aleatoria generada", true);
+}
+
+function enviar() {
+    const nombre = document.getElementById("nombreJugador").value.trim();
+
+    // VALIDACIÓN 1: Nombre
+    if (!nombre) {
+        mostrarAlerta("⚠️ Escribe tu nombre");
+        document.getElementById("nombreJugador").focus();
+        return;
+    }
+
+    // VALIDACIÓN 2: Al menos 1 quiniela guardada
+    if (guardadas.length === 0) {
+        mostrarAlerta("⚠️ Agrega al menos una quiniela");
+        return;
+    }
+
+    // CONSTRUIR MENSAJE
+    let mensaje = `*Nombre:* ${nombre}\n\n`;
+
+    guardadas.forEach((q) => {
+        mensaje += `*${q.id} =* ${q.pronosticos.join(" ")}\n`;
+    });
+
+    const total = guardadas.length * PRECIO_QUINIELA;
+    mensaje += `\n*Monto total: $${total}.00*`;
+
+    const url = `https://wa.me/52${WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, "_blank");
+
+    mostrarAlerta("✅ Abriendo WhatsApp...", true);
+}
+
+/* ============================================================
+   ALERTA
+   ============================================================ */
+let alertaTimeout = null;
+function mostrarAlerta(texto, exito = false) {
+    const alerta = document.getElementById("alerta");
+    alerta.textContent = texto;
+    alerta.className = "alerta mostrar" + (exito ? " exito" : "");
+    clearTimeout(alertaTimeout);
+    alertaTimeout = setTimeout(() => {
+        alerta.className = "alerta" + (exito ? " exito" : "");
+    }, 2800);
+}
+
+/* ============================================================
+   INICIALIZACIÓN
+   ============================================================ */
+renderPartidos();
+renderListaGuardadas();
+actualizarInfo();
 </script>
+
 </body>
 </html>
